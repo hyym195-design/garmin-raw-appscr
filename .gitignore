@@ -1,0 +1,10 @@
+node_modules/
+.clasp.json
+.clasprc.json
+.env
+credentials*.json
+client_secret*.json
+data/
+*.log
+__pycache__/
+*.pyc

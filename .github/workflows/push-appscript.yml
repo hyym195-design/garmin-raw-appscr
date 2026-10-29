@@ -1,0 +1,36 @@
+name: Push code to Apps Script
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: apps-script-code
+  cancel-in-progress: false
+jobs:
+  push:
+    runs-on: ubuntu-latest
+    environment: apps-script
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm test
+      - name: Configure authenticated clasp
+        env:
+          CLASPRC_JSON: ${{ secrets.CLASPRC_JSON }}
+          APPS_SCRIPT_ID: ${{ secrets.APPS_SCRIPT_ID }}
+        run: |
+          node --input-type=module <<'JS'
+          import {writeFileSync} from 'node:fs';
+          if (!process.env.CLASPRC_JSON || !process.env.APPS_SCRIPT_ID) throw new Error('Set CLASPRC_JSON and APPS_SCRIPT_ID repository secrets first');
+          const auth = JSON.parse(process.env.CLASPRC_JSON);
+          writeFileSync(process.env.HOME + '/.clasprc.json', JSON.stringify(auth), {mode: 0o600});
+          writeFileSync('.clasp.json', JSON.stringify({scriptId: process.env.APPS_SCRIPT_ID, rootDir: 'src'}), {mode: 0o600});
+          JS
+      - run: npx clasp push --force
+      - name: Remove local credentials
+        if: always()
+        run: rm -f "$HOME/.clasprc.json" .clasp.json

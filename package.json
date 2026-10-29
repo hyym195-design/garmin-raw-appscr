@@ -1,0 +1,13 @@
+{
+  "name": "garmin-raw-appscript",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test": "node --test test/*.test.cjs",
+    "setup": "node scripts/setup.mjs",
+    "push": "clasp push",
+    "open": "clasp open-script"
+  },
+  "engines": {"node": ">=20"},
+  "devDependencies": {"@google/clasp": "3.4.1"}
+}
